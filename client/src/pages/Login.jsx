@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
-import './login.css';
 
 const Login = ({ darkMode }) => {
   const navigate = useNavigate();
@@ -31,9 +30,9 @@ const Login = ({ darkMode }) => {
       setError('Please fill in all fields');
       return false;
     }
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@adypu\.edu\.in$/i;
     if (!emailRegex.test(formData.email)) {
-      setError('Please enter a valid email address');
+      setError('Email must be from adypu.edu.in domain');
       return false;
     }
     return true;
@@ -46,7 +45,7 @@ const Login = ({ darkMode }) => {
     setLoading(true);
     setError('');
 
-    const API_BASE = import.meta.env.VITE_API_URL;
+    const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000';
     console.log('VITE_API_URL:', import.meta.env.VITE_API_URL);
 
     try {
@@ -87,7 +86,11 @@ const Login = ({ darkMode }) => {
         }
 
         console.log('Login successful:', data.message);
-        navigate('/', { replace: true });
+        
+        // Navigate to coming-soon page - use setTimeout to ensure React Router picks up the change
+        setTimeout(() => {
+          navigate('/coming-soon', { replace: true });
+        }, 0);
       } else {
         if (data.code === 'EMAIL_NOT_VERIFIED') {
           setError(`${data.message} Please verify your email.`);
@@ -112,88 +115,150 @@ const Login = ({ darkMode }) => {
   const togglePassword = () => setShowPassword(prev => !prev);
 
   return (
-    <div className={`login-container ${darkMode ? 'dark' : 'light'}`}>
-      <div className={`login-card ${darkMode ? 'dark' : 'light'}`}>
-        <div className="login-header">
-          <div className="lock-icon">
-            <Lock size={26} color="#2563eb" />
+    <div 
+      className="min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat relative"
+      style={{
+        backgroundImage: 'url(/background.jpg)'
+      }}
+    >
+      {/* Overlay for better readability */}
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px]"></div>
+      
+      {/* Login Card */}
+      <div className="relative z-10 w-full max-w-md mx-4">
+        <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 p-8">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <div className="flex justify-center mb-4">
+              <div className="p-3 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg">
+                <Lock className="text-white" size={24} />
+              </div>
+            </div>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">
+              Welcome Back
+            </h1>
+            <p className="text-sm text-gray-600">
+              Sign in to continue to CampusConnect
+            </p>
           </div>
-          <h1>Sign in with email</h1>
-          <p>Make a new doc to bring your words, data, and teams together — for free.</p>
-        </div>
 
-        {error && <div className="error-message">{error}</div>}
+          {/* Error Message */}
+          {error && (
+            <div className="mb-6 p-3 bg-red-50 border border-red-200 rounded-lg animate-shake">
+              <p className="text-sm text-red-600 text-center font-medium">{error}</p>
+            </div>
+          )}
 
-        <form onSubmit={handleLogin}>
-          <div className={`input-group ${darkMode ? 'dark' : 'light'}`}>
-            <Mail size={18} className="input-icon" />
-            <input
-              type="email"
-              name="email"
-              placeholder="Email"
-              value={formData.email}
-              onChange={handleChange}
-              disabled={loading}
-              required
-            />
-          </div>
+          {/* Form */}
+          <form onSubmit={handleLogin} className="space-y-5">
+            {/* Email Input */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700 block">
+                Email Address
+              </label>
+              <div className="relative">
+                <Mail 
+                  className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-gray-400" 
+                  size={18} 
+                />
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="example@adypu.edu.in"
+                  value={formData.email}
+                  onChange={handleChange}
+                  disabled={loading}
+                  required
+                  className="w-full pl-11 pr-4 py-3 text-sm rounded-lg border border-gray-300 bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                />
+              </div>
+            </div>
 
-          <div className={`input-group ${darkMode ? 'dark' : 'light'}`}>
-            <Lock size={18} className="input-icon" />
-            <input
-              type={showPassword ? 'text' : 'password'}
-              name="password"
-              placeholder="Password"
-              value={formData.password}
-              onChange={handleChange}
-              disabled={loading}
-              required
-            />
+            {/* Password Input */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700 block">
+                Password
+              </label>
+              <div className="relative">
+                <Lock 
+                  className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-gray-400" 
+                  size={18} 
+                />
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  name="password"
+                  placeholder="Enter your password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  disabled={loading}
+                  required
+                  className="w-full pl-11 pr-11 py-3 text-sm rounded-lg border border-gray-300 bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                />
+                <button
+                  type="button"
+                  onClick={togglePassword}
+                  disabled={loading}
+                  className="absolute right-3.5 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+            </div>
+
+            {/* Remember Me & Forgot Password */}
+            <div className="flex items-center justify-between">
+              <label className="flex items-center cursor-pointer group">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  disabled={loading}
+                  className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-2 disabled:opacity-50 mr-2"
+                />
+                <span className="text-sm text-gray-700 group-hover:text-gray-900">Remember me</span>
+              </label>
+              <Link 
+                to="/forgot-password" 
+                className="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
+              >
+                Forgot password?
+              </Link>
+            </div>
+
+            {/* Submit Button */}
             <button
-              type="button"
-              className="password-toggle"
-              onClick={togglePassword}
+              type="submit"
               disabled={loading}
+              className={`w-full py-3 px-4 rounded-lg font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none ${
+                loading ? 'cursor-not-allowed' : ''
+              }`}
             >
-              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              {loading ? (
+                <span className="flex items-center justify-center">
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647A7.962 7.962 0 0112 20c0-3.042-1.135-5.824-3-7.938l-3 2.647z"></path>
+                  </svg>
+                  Signing In...
+                </span>
+              ) : (
+                'Sign In'
+              )}
             </button>
+          </form>
+
+          {/* Footer */}
+          <div className="text-center mt-6">
+            <p className="text-sm text-gray-600">
+              Don't have an account?{' '}
+              <Link 
+                to="/register" 
+                className="font-semibold text-blue-600 hover:text-blue-700 transition-colors"
+              >
+                Sign up
+              </Link>
+            </p>
           </div>
-
-          <div className="login-options">
-            <label>
-              <input
-                type="checkbox"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-                disabled={loading}
-              /> Remember Me
-            </label>
-            <Link to="/forgot-password">Forgot password?</Link>
-          </div>
-
-          <button
-            type="submit"
-            className="login-button"
-            disabled={loading}
-          >
-            {loading ? 'Signing In...' : 'Get Started'}
-          </button>
-        </form>
-
-        <div className="divider">Or sign in with</div>
-
-        <div className="social-login">
-          <button className="social-btn">
-            <img src="/google.svg" alt="Google" width="20" height="20" />
-          </button>
-          <button className="social-btn">
-            <img src="/apple.svg" alt="Apple" width="20" height="20" />
-          </button>
-        </div>
-
-        <div className="login-footer">
-          Don’t have an account?
-          <Link to="/signup"> Create one</Link>
         </div>
       </div>
     </div>
