@@ -1,10 +1,10 @@
-# 📚 CampusConnect – A Social and Professional Network for Our College Community
+#  CampusConnect – A Social and Professional Network for Our College Community
 
 > A unified platform to connect students, alumni, and faculty for collaboration, communication, and career growth.
 
 ---
 
-## 🎯 Objective
+##  Objective
 
 The main goal of **CampusConnect** is to create a secure digital ecosystem where members of the college community can:
 - Build a **college-exclusive social network**
@@ -14,7 +14,7 @@ The main goal of **CampusConnect** is to create a secure digital ecosystem where
 
 ---
 
-## 🧩 Problem Statement
+##  Problem Statement
 
 Students currently use multiple scattered platforms for different needs:
 - **WhatsApp** → Groups and updates  
@@ -35,18 +35,18 @@ Hence, there’s a need for a **dedicated platform** where only verified college
 
 CampusConnect unifies social and professional features into one secure ecosystem.
 
-### 🔑 Key Features
-- ✅ Login with **official college email (email verification)**
-- 👤 **Profile creation** – bio, course, batch, interests, skills  
-- 💬 **Chat system** – 1:1 and group chats using Socket.io  
-- 🧠 **Study rooms** – topic-based academic discussions  
-- 📰 **Feed section** – posts, updates, reels  
-- 🎯 **Event board** – internships, hackathons, workshops  
-- 🤝 **Alumni connect** – mentorship and networking  
+###  Key Features
+- Login with **official college email (email verification)**
+- **Profile creation** – bio, course, batch, interests, skills  
+- **Chat system** – 1:1 and group chats using Socket.io  
+- **Study rooms** – topic-based academic discussions  
+- **Feed section** – posts, updates, reels  
+- **Event board** – internships, hackathons, workshops  
+- **Alumni connect** – mentorship and networking  
 
 ---
 
-## ⚙️ Technology Stack
+## Technology Stack
 
 | Component | Technology Used |
 |------------|-----------------|
@@ -61,7 +61,7 @@ CampusConnect unifies social and professional features into one secure ecosystem
 
 ---
 
-## 🔒 Security & Privacy
+## Security & Privacy
 
 - Only **verified college emails** can register  
 - **Passwords hashed** securely using bcrypt  
@@ -70,30 +70,30 @@ CampusConnect unifies social and professional features into one secure ecosystem
 
 ---
 
-## 📁 Current Project Structure
+## Current Project Structure
 
 ### Frontend (`/client`)
 ```
 client/
 ├── src/
 │   ├── pages/
-│   │   ├── Login.jsx          ✅ Active - User authentication
-│   │   ├── Register.jsx        ✅ Active - User registration
-│   │   ├── ComingSoon.jsx      ✅ Active - Placeholder after login
-│   │   ├── Chat.jsx            📋 Created (not yet active)
-│   │   ├── Feed.jsx            📋 Created (not yet active)
-│   │   ├── Home.jsx            📋 Created (not yet active)
-│   │   ├── Profile.jsx         📋 Created (not yet active)
-│   │   └── StudyRooms.jsx      📋 Created (not yet active)
+│   │   ├── Login.jsx           Active - User authentication
+│   │   ├── Register.jsx         Active - User registration
+│   │   ├── ComingSoon.jsx      Active - Placeholder after login
+│   │   ├── Chat.jsx            Created (not yet active)
+│   │   ├── Feed.jsx            Created (not yet active)
+│   │   ├── Home.jsx            Created (not yet active)
+│   │   ├── Profile.jsx         Created (not yet active)
+│   │   └── StudyRooms.jsx      Created (not yet active)
 │   ├── components/
 │   │   ├── Loader.jsx
 │   │   ├── Navbar.jsx
 │   │   ├── NotificationBell.jsx
 │   │   └── Sidebar.jsx
-│   └── App.jsx                 ✅ Routing and protected routes
+│   └── App.jsx                 Routing and protected routes
 ├── public/
-│   ├── background.jpg          ✅ Login/Register background
-│   └── comingsoon.jpeg         ✅ Coming Soon page background
+│   ├── background.jpg          Login/Register background
+│   └── comingsoon.jpeg         Coming Soon page background
 └── package.json
 ```
 
@@ -101,40 +101,40 @@ client/
 ```
 server/
 ├── config/
-│   ├── db.js                   ✅ MongoDB connection setup
-│   └── socket.js               📋 Socket.io configuration (prepared)
+│   ├── db.js                   MongoDB connection setup
+│   └── socket.js               Socket.io configuration (prepared)
 ├── controllers/
-│   ├── authController.js       ✅ Login & Signup logic
-│   ├── chatController.js       📋 Created (not yet active)
-│   ├── postController.js       📋 Created (not yet active)
-│   └── userController.js      📋 Created (not yet active)
+│   ├── authController.js       Login & Signup logic
+│   ├── chatController.js       Created (not yet active)
+│   ├── postController.js       Created (not yet active)
+│   └── userController.js      Created (not yet active)
 ├── middleware/
-│   ├── authMiddleware.js      📋 JWT verification middleware
-│   └── errorHandler.js         📋 Error handling middleware
+│   ├── authMiddleware.js      JWT verification middleware
+│   └── errorHandler.js        Error handling middleware
 ├── models/
-│   ├── User.js                 ✅ User schema with validation
-│   ├── Message.js              📋 Created (not yet active)
-│   ├── Notification.js         📋 Created (not yet active)
-│   ├── Post.js                 📋 Created (not yet active)
-│   └── Room.js                 📋 Created (not yet active)
+│   ├── User.js                 User schema with validation
+│   ├── Message.js              Created (not yet active)
+│   ├── Notification.js         Created (not yet active)
+│   ├── Post.js                 Created (not yet active)
+│   └── Room.js                 Created (not yet active)
 ├── routes/
-│   ├── authRoutes.js           ✅ Authentication endpoints
-│   ├── chatRoutes.js           📋 Created (not yet active)
-│   ├── postRoutes.js           📋 Created (not yet active)
-│   ├── roomRoutes.js           📋 Created (not yet active)
-│   └── userRoutes.js           📋 Created (not yet active)
-└── index.js                    ✅ Express server setup
+│   ├── authRoutes.js           Authentication endpoints
+│   ├── chatRoutes.js           Created (not yet active)
+│   ├── postRoutes.js           Created (not yet active)
+│   ├── roomRoutes.js           Created (not yet active)
+│   └── userRoutes.js           Created (not yet active)
+└── index.js                    Express server setup
 ```
 
 **Legend:**
-- ✅ **Active** - Currently implemented and functional
-- 📋 **Created** - File exists but not yet fully integrated/active
+- **Active** - Currently implemented and functional
+- **Created** - File exists but not yet fully integrated/active
 
 ---
 
-## ✅ What's Been Implemented
+## What's Been Implemented
 
-### 1. **Authentication System** ✅
+### 1. **Authentication System** 
 - **User Registration** (`/register`)
   - Email and password registration
   - Real-time form validation
@@ -158,7 +158,7 @@ server/
   - Logout functionality
   - Progress indicator
 
-### 2. **Backend API** ✅
+### 2. **Backend API** 
 - Express.js server with CORS enabled
 - MongoDB connection setup
 - Authentication endpoints:
@@ -166,7 +166,7 @@ server/
   - `POST /api/auth/login` - User login
 - Health check endpoint: `GET /api/health`
 
-### 3. **Database Models** ✅
+### 3. **Database Models** 
 - **User Model** fully implemented with:
   - Email validation (adypu.edu.in domain)
   - Password hashing with bcrypt
@@ -174,7 +174,7 @@ server/
   - Email uniqueness constraint
   - Password comparison method
 
-### 4. **Frontend Features** ✅
+### 4. **Frontend Features** 
 - React Router setup with protected routes
 - Dark mode toggle support (infrastructure ready)
 - Responsive design with Tailwind CSS
@@ -270,10 +270,10 @@ userSchema.methods.comparePassword = async function(candidatePassword) {
 ```
 
 **Security Features:**
-- ✅ Passwords hashed with bcrypt (salt rounds: 10)
-- ✅ Automatic hashing before saving to database
-- ✅ Secure password comparison method
-- ✅ Passwords never stored in plain text
+- Passwords hashed with bcrypt (salt rounds: 10)
+- Automatic hashing before saving to database
+- Secure password comparison method
+- Passwords never stored in plain text
 
 ### **JWT Authentication**
 
@@ -312,16 +312,16 @@ function ProtectedRoute({ children }) {
 ```
 
 #### Current Protected Routes
-- ✅ `/coming-soon` - Requires authentication
-- ✅ `/login`, `/register` - Redirect to `/coming-soon` if already authenticated
+- `/coming-soon` - Requires authentication
+- `/login`, `/register` - Redirect to `/coming-soon` if already authenticated
 
 ### **Input Validation Summary**
 
 | Input | Frontend | Backend | Database |
 |-------|----------|---------|----------|
-| **Email** | ✅ Domain regex | ✅ Domain validation | ✅ Schema match |
-| **Password** | ✅ Length & match | ✅ Length check | ✅ Minlength constraint |
-| **Required Fields** | ✅ Required attributes | ✅ Null checks | ✅ Required schema |
+| **Email** |  Domain regex |  Domain validation |  Schema match |
+| **Password** |  Length & match |  Length check | Minlength constraint |
+| **Required Fields** |  Required attributes |  Null checks |  Required schema |
 
 ### **Error Handling**
 
@@ -350,7 +350,7 @@ function ProtectedRoute({ children }) {
 
 ---
 
-## 🚀 Expected Outcome
+## Expected Outcome
 
 - A **fully functional web app** accessible to all batches  
 - **Stronger student–alumni connections**  
@@ -358,13 +358,13 @@ function ProtectedRoute({ children }) {
 
 ---
 
-## 🗓️ Project Timeline
+## Project Timeline
 
 | Phase | Duration | Tasks |
 |--------|-----------|--------|
-| **1. Planning & Research** | Week 1 ✅ | Define features, roles, and architecture |
-| **2. UI/UX Design** | Week 2 🧩 | Create wireframes and interface designs |
-| **3. Backend Development** | Weeks 3–4 ⏳ | Build APIs, database models, authentication |
+| **1. Planning & Research** | Week 1 | Define features, roles, and architecture |
+| **2. UI/UX Design** | Week 2  | Create wireframes and interface designs |
+| **3. Backend Development** | Weeks 3–4 | Build APIs, database models, authentication |
 | **4. Frontend Integration** | Weeks 5–6 | Connect frontend with backend |
 | **5. Chat & Reels Module** | Weeks 7–8 | Implement Socket.io and media uploads |
 | **6. Testing & Debugging** | Week 9 | Functional and performance testing |
@@ -372,7 +372,7 @@ function ProtectedRoute({ children }) {
 
 ---
 
-## 🧱 Modules / Features
+## Modules / Features
 
 | Module | Description |
 |---------|-------------|
