@@ -19,6 +19,12 @@ const userSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
+  username: {
+    type: String,
+    trim: true,
+    unique: true,
+    sparse: true
+  },
   profilePicture: {
     type: String,
     default: ''
@@ -26,6 +32,18 @@ const userSchema = new mongoose.Schema({
   bio: {
     type: String,
     default: ''
+  },
+  learningJourney: {
+    type: String,
+    default: ''
+  },
+  achievements: {
+    type: [String],
+    default: []
+  },
+  bioCompleted: {
+    type: Boolean,
+    default: false
   },
   course: {
     type: String,
@@ -38,6 +56,51 @@ const userSchema = new mongoose.Schema({
   isVerified: {
     type: Boolean,
     default: false
+  },
+  friends: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
+  friendRequests: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
+  sentFriendRequests: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
+  savedPosts: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Post'
+  }],
+  savedReels: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Reel'
+  }],
+  blockedUsers: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
+  lastSeen: {
+    type: Date,
+    default: Date.now
+  },
+  role: {
+    type: String,
+    enum: ['user', 'admin'],
+    default: 'user'
+  },
+  isBanned: {
+    type: Boolean,
+    default: false
+  },
+  bannedAt: {
+    type: Date,
+    default: null
+  },
+  banReason: {
+    type: String,
+    default: ''
   }
 }, {
   timestamps: true

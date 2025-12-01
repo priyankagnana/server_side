@@ -70,7 +70,10 @@ const signup = async (req, res) => {
       id: user._id,
       email: user.email,
       name: user.name,
-      isVerified: user.isVerified
+      username: user.username,
+      bioCompleted: user.bioCompleted,
+      isVerified: user.isVerified,
+      role: user.role || 'user'  // Include role in response
     };
 
     res.status(201).json({
@@ -144,7 +147,10 @@ const login = async (req, res) => {
       id: user._id,
       email: user.email,
       name: user.name,
-      isVerified: user.isVerified
+      username: user.username,
+      bioCompleted: user.bioCompleted,
+      isVerified: user.isVerified,
+      role: user.role || 'user'  // Include role in response
     };
 
     res.status(200).json({

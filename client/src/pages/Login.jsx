@@ -86,10 +86,24 @@ const Login = ({ darkMode }) => {
         }
 
         console.log('Login successful:', data.message);
+        console.log('User role:', data.user?.role);
         
-        // Navigate to coming-soon page - use setTimeout to ensure React Router picks up the change
+        // Navigate based on user role and bio completion status
+        let redirectPath;
+        if (data.user?.role === 'admin') {
+          // Admin users go directly to admin panel
+          redirectPath = '/admin';
+          console.log('Redirecting admin to /admin');
+        } else if (data.user?.bioCompleted) {
+          // Regular users go to feed if bio is completed
+          redirectPath = '/feed';
+        } else {
+          // New users go to bio setup
+          redirectPath = '/bio-setup';
+        }
+        
         setTimeout(() => {
-          navigate('/coming-soon', { replace: true });
+          navigate(redirectPath, { replace: true });
         }, 0);
       } else {
         if (data.code === 'EMAIL_NOT_VERIFIED') {
