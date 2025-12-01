@@ -58,7 +58,6 @@ const roomSchema = new mongoose.Schema({
 
 // Index for finding user's rooms
 roomSchema.index({ participants: 1 });
-roomSchema.index({ inviteLink: 1 });
 
 module.exports = mongoose.model('Room', roomSchema);
 
