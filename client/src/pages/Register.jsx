@@ -69,9 +69,9 @@ const Register = ({ darkMode }) => {
 
         console.log('Signup successful:', data.message);
         
-        // Navigate to coming-soon page - use setTimeout to ensure React Router picks up the change
+        // Navigate to bio-setup page for new users - use setTimeout to ensure React Router picks up the change
         setTimeout(() => {
-          navigate('/coming-soon', { replace: true });
+          navigate('/bio-setup', { replace: true });
         }, 0);
       } else {
         setError(data.message || 'Signup failed. Please try again.');
