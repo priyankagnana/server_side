@@ -75,6 +75,9 @@ app.use('/api/calls', require('./routes/callRoutes'));
 // Study Group routes
 app.use('/api/study-groups', require('./routes/studyGroupRoutes'));
 
+// Notification routes
+app.use('/api/notifications', require('./routes/notificationRoutes'));
+
 // 404 handler
 app.use((req, res) => {
   res.status(404).json({

@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Edit2, Save, X, Upload, Mail, Award, BookOpen, Camera, ArrowLeft, Users, LogOut, UserPlus, UserMinus, Bookmark, Loader2, Hash, FileText, Settings, User, MapPin, GraduationCap, Code, Heart, TrendingUp, Briefcase } from 'lucide-react';
+import { Edit2, Save, X, Upload, Mail, Award, BookOpen, Camera, ArrowLeft, Users, LogOut, UserPlus, UserMinus, Bookmark, Loader2, Hash, FileText, Settings, User, MapPin, GraduationCap, Code, Heart, TrendingUp, Briefcase, Video } from 'lucide-react';
 import { useToast } from '../components/Toast.jsx';
 import PostCard from '../components/PostCard';
 import DashboardNavbar from '../components/DashboardNavbar';
 import FriendsModal from '../components/FriendsModal.jsx';
+import ReelsViewer from '../components/ReelsViewer';
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -16,6 +17,7 @@ const Profile = () => {
   const [error, setError] = useState('');
   const [editingField, setEditingField] = useState(null);
   const [userPosts, setUserPosts] = useState([]);
+  const [userReels, setUserReels] = useState([]);
   const [isOwnProfile, setIsOwnProfile] = useState(true);
   const [formData, setFormData] = useState({
     username: '',
@@ -51,12 +53,15 @@ const Profile = () => {
   const [showFriendsModal, setShowFriendsModal] = useState(false);
   const [userStudyGroups, setUserStudyGroups] = useState([]);
   const [loadingStudyGroups, setLoadingStudyGroups] = useState(false);
-  const [activeTab, setActiveTab] = useState('posts'); // 'posts', 'about', 'groups'
+  const [activeTab, setActiveTab] = useState('posts'); // 'posts', 'reels', 'about', 'groups'
+  const [isViewerOpen, setIsViewerOpen] = useState(false);
+  const [selectedReelIndex, setSelectedReelIndex] = useState(0);
 
   // Load user data and posts
   useEffect(() => {
     loadUserData();
     loadUserPosts();
+    loadUserReels();
   }, [id]);
 
   // Load study groups when profile is loaded and it's own profile
@@ -257,6 +262,45 @@ const Profile = () => {
       }
     } catch (error) {
       console.error('Error loading user posts:', error);
+    }
+  };
+
+  const loadUserReels = async () => {
+    try {
+      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+      const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+
+      const response = await fetch(`${API_BASE}/api/reels`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.reels) {
+          const targetUserId = id || (() => {
+            const currentUser = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
+            return currentUser._id || currentUser.id;
+          })();
+
+          const userReels = data.reels.filter(reel => {
+            const reelAuthorId = reel.author?.id || reel.author?._id;
+            return reelAuthorId && reelAuthorId.toString() === targetUserId?.toString();
+          });
+
+          // Sort reels by createdAt (newest first)
+          const sortedReels = userReels.sort((a, b) => {
+            const aCreated = a.createdAt ? new Date(a.createdAt) : new Date(0);
+            const bCreated = b.createdAt ? new Date(b.createdAt) : new Date(0);
+            return bCreated - aCreated;
+          });
+
+          setUserReels(sortedReels);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading user reels:', error);
     }
   };
 
@@ -881,6 +925,21 @@ const Profile = () => {
                   )}
                 </button>
                 <button
+                  onClick={() => setActiveTab('reels')}
+                  className={`flex-1 md:flex-none px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 flex items-center justify-center gap-2 ${activeTab === 'reels'
+                    ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg scale-105'
+                    : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                    }`}
+                >
+                  <Video size={18} />
+                  <span>Reels</span>
+                  {userReels.length > 0 && (
+                    <span className="ml-1 px-2 py-0.5 bg-white/20 rounded-full text-xs">
+                      {userReels.length}
+                    </span>
+                  )}
+                </button>
+                <button
                   onClick={() => setActiveTab('about')}
                   className={`flex-1 md:flex-none px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 flex items-center justify-center gap-2 ${activeTab === 'about'
                     ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg scale-105'
@@ -957,6 +1016,71 @@ const Profile = () => {
                     </div>
                     <h3 className="text-xl font-semibold text-gray-700 mb-2">No posts yet</h3>
                     <p className="text-gray-500">Start sharing your thoughts and experiences!</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activeTab === 'reels' && (
+              <div className="rounded-3xl bg-white/80 backdrop-blur-xl border border-gray-200/50 shadow-xl p-6 sm:p-8 transition-all duration-300">
+                <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-200">
+                  <div className="p-2 bg-gradient-to-br from-red-100 to-pink-100 rounded-xl">
+                    <Video className="text-red-600" size={20} />
+                  </div>
+                  <h2 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                    {isOwnProfile ? 'My Reels' : `${formData.username || 'User'}'s Reels`}
+                  </h2>
+                  {userReels.length > 0 && (
+                    <span className="ml-auto px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-semibold">
+                      {userReels.length}
+                    </span>
+                  )}
+                </div>
+                {userReels.length > 0 ? (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                    {userReels.map((reel, index) => (
+                      <div
+                        key={reel.id || reel._id}
+                        className="aspect-[9/16] bg-gray-200 rounded-lg overflow-hidden cursor-pointer hover:opacity-90 transition-opacity relative group"
+                        onClick={() => {
+                          setSelectedReelIndex(index);
+                          setIsViewerOpen(true);
+                        }}
+                      >
+                        {reel.thumbnailUrl ? (
+                          <img 
+                            src={reel.thumbnailUrl} 
+                            alt={reel.caption || 'Reel'} 
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
+                            <Video size={32} className="text-white" />
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                          <Video size={24} className="text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </div>
+                        <div className="absolute bottom-2 left-2 right-2 flex items-center gap-3 text-white text-xs">
+                          <span className="flex items-center gap-1">
+                            <span>❤️</span>
+                            <span>{reel.likes?.length || reel.likes || 0}</span>
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <span>💬</span>
+                            <span>{reel.comments?.length || reel.comments || 0}</span>
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-16">
+                    <div className="inline-block p-6 bg-gradient-to-br from-red-100 to-pink-100 rounded-full mb-4">
+                      <Video size={48} className="text-red-600" />
+                    </div>
+                    <h3 className="text-xl font-semibold text-gray-700 mb-2">No reels yet</h3>
+                    <p className="text-gray-500">Start sharing your video content!</p>
                   </div>
                 )}
               </div>
@@ -1582,6 +1706,20 @@ const Profile = () => {
           const currentUser = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
           return currentUser._id || currentUser.id;
         })()}
+      />
+
+      {/* Reels Viewer */}
+      <ReelsViewer
+        isOpen={isViewerOpen}
+        onClose={() => {
+          setIsViewerOpen(false);
+        }}
+        reels={userReels}
+        initialIndex={selectedReelIndex}
+        onReelDeleted={loadUserReels}
+        onReelChange={(index) => {
+          setSelectedReelIndex(index);
+        }}
       />
     </div >
   );

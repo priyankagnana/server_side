@@ -578,7 +578,7 @@ const DashboardSidebar = () => {
             Loading...
           </div>
         ) : suggestedFriends.length > 0 ? (
-          <div className="space-y-3 max-h-96 overflow-y-auto scrollbar-hide pr-2">
+          <div className="space-y-3" style={{ maxHeight: '400px', overflowY: 'auto' }}>
             {suggestedFriends.map((user) => (
               <div key={user.id || user._id} className="flex items-center justify-between flex-shrink-0">
                 <div className="flex items-center gap-3 min-w-0 flex-1">
