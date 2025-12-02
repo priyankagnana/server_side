@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BookOpen, Hash, Loader2 } from 'lucide-react';
+import { BookOpen, Hash, Loader2, Globe, Lock, UserPlus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000';
@@ -86,12 +86,29 @@ const StudyGroupsSidebar = () => {
                   {group.description && (
                     <p className="text-xs text-gray-600 mb-2 line-clamp-2">{group.description}</p>
                   )}
-                  <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
+                  <div className="flex items-center gap-2 text-xs text-gray-500 mb-2 flex-wrap">
                     <span className="px-2 py-0.5 bg-white/60 rounded-md font-medium">
                       {group.category || 'General'}
                     </span>
                     <span>•</span>
                     <span>{group.members?.length || 0} members</span>
+                    {group.joinType && (
+                      <>
+                        <span>•</span>
+                        <span className={`px-2 py-0.5 rounded-md font-medium flex items-center gap-1 ${
+                          group.joinType === 'public' ? 'bg-green-100 text-green-700' :
+                          group.joinType === 'invite-only' ? 'bg-yellow-100 text-yellow-700' :
+                          'bg-blue-100 text-blue-700'
+                        }`}>
+                          {group.joinType === 'public' && <Globe size={10} />}
+                          {group.joinType === 'invite-only' && <Lock size={10} />}
+                          {group.joinType === 'request-to-join' && <UserPlus size={10} />}
+                          {group.joinType === 'public' ? 'Public' :
+                           group.joinType === 'invite-only' ? 'Invite Only' :
+                           'Request to Join'}
+                        </span>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>

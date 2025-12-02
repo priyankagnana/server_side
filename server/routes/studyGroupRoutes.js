@@ -11,7 +11,15 @@ const {
     createChannel,
     deleteChannel,
     getChannelMessages,
-    sendChannelMessage
+    sendChannelMessage,
+    requestToJoin,
+    getJoinRequests,
+    approveRequest,
+    rejectRequest,
+    inviteMember,
+    makeAdmin,
+    removeMember,
+    deleteStudyGroup
 } = require('../controllers/studyGroupController');
 
 // Import authenticated middleware correctly
@@ -26,6 +34,18 @@ router.get('/', getStudyGroups);
 router.post('/join', joinStudyGroup);
 router.get('/:groupId', getStudyGroup);
 router.post('/:groupId/leave', leaveStudyGroup);
+router.delete('/:groupId', deleteStudyGroup);
+
+// Join request routes
+router.post('/:groupId/request', requestToJoin);
+router.get('/:groupId/requests', getJoinRequests);
+router.post('/:groupId/requests/:requestId/approve', approveRequest);
+router.post('/:groupId/requests/:requestId/reject', rejectRequest);
+
+// Member management routes
+router.post('/:groupId/invite', inviteMember);
+router.post('/:groupId/members/:memberId/make-admin', makeAdmin);
+router.delete('/:groupId/members/:memberId', removeMember);
 
 // Channel routes
 router.post('/:groupId/channels', createChannel);

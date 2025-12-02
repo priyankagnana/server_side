@@ -120,6 +120,11 @@ const studyGroupSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  joinType: {
+    type: String,
+    enum: ['public', 'invite-only', 'request-to-join'],
+    default: 'public'
+  },
   category: {
     type: String,
     default: 'General'
@@ -130,7 +135,13 @@ const studyGroupSchema = new mongoose.Schema({
   }],
   maxMembers: {
     type: Number,
-    default: 100
+    default: 100,
+    min: 1,
+    max: 10000,
+    validate: {
+      validator: Number.isInteger,
+      message: 'maxMembers must be an integer'
+    }
   }
 }, {
   timestamps: true
@@ -206,10 +217,29 @@ studyGroupSchema.pre('save', async function (next) {
 
     this.channels = [generalChannel, announcementsChannel];
 
-    // Generate invite code if not already set
+    // Generate unique invite code if not already set
     if (!this.inviteCode) {
-      this.inviteCode = Math.random().toString(36).substring(2, 10).toUpperCase();
-      this.inviteCodeExpiry = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
+      let attempts = 0;
+      let isUnique = false;
+      const maxAttempts = 10;
+      
+      while (!isUnique && attempts < maxAttempts) {
+        const code = Math.random().toString(36).substring(2, 10).toUpperCase();
+        // Check if code already exists using this.constructor to avoid circular dependency
+        const existing = await this.constructor.findOne({ inviteCode: code });
+        if (!existing) {
+          this.inviteCode = code;
+          this.inviteCodeExpiry = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
+          isUnique = true;
+        }
+        attempts++;
+      }
+      
+      if (!isUnique) {
+        // Fallback: use timestamp + random for guaranteed uniqueness
+        this.inviteCode = `${Date.now().toString(36).toUpperCase()}${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+        this.inviteCodeExpiry = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+      }
     }
   }
   next();
@@ -218,7 +248,6 @@ studyGroupSchema.pre('save', async function (next) {
 // Indexes
 studyGroupSchema.index({ owner: 1 });
 studyGroupSchema.index({ 'members.user': 1 });
-studyGroupSchema.index({ inviteCode: 1 });
 studyGroupSchema.index({ isPublic: 1 });
 
 module.exports = mongoose.model('StudyGroup', studyGroupSchema);
