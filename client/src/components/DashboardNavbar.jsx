@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Bell, MessageCircle, UserPlus, Shield } from 'lucide-react';
+import NotificationsDropdown from './NotificationsDropdown';
+import { useSocket } from '../contexts/SocketContext';
 
 const DashboardNavbar = () => {
   const navigate = useNavigate();
@@ -14,6 +16,9 @@ const DashboardNavbar = () => {
   const [profilePicture, setProfilePicture] = useState(user?.profilePicture || '');
   const [friendRequestCount, setFriendRequestCount] = useState(0);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [notificationCount, setNotificationCount] = useState(0);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const { socket } = useSocket();
 
   // Fetch user profile data to sync with database
   useEffect(() => {
@@ -151,6 +156,54 @@ const DashboardNavbar = () => {
     };
   }, []);
 
+  // Fetch notification count
+  useEffect(() => {
+    const fetchNotificationCount = async () => {
+      try {
+        const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+        const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+        
+        if (!token) return;
+
+        const response = await fetch(`${API_BASE}/api/notifications/unread-count`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success) {
+            setNotificationCount(data.unreadCount);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching notification count:', error);
+      }
+    };
+
+    fetchNotificationCount();
+
+    // Poll every 30 seconds
+    const interval = setInterval(fetchNotificationCount, 30000);
+
+    // Listen for new notifications via socket
+    if (socket) {
+      const handleNewNotification = () => {
+        fetchNotificationCount();
+      };
+
+      socket.on('new_notification', handleNewNotification);
+
+      return () => {
+        clearInterval(interval);
+        socket.off('new_notification', handleNewNotification);
+      };
+    }
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [socket]);
+
   return (
     <nav className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -185,9 +238,20 @@ const DashboardNavbar = () => {
           {/* Right Icons */}
           <div className="flex items-center gap-4">
             {/* Notifications */}
-            <div className="relative cursor-pointer">
+            <div 
+              className="relative cursor-pointer"
+              onClick={() => setShowNotifications(!showNotifications)}
+            >
               <Bell className="text-gray-600 hover:text-purple-600 transition-colors" size={24} />
-              <span className="absolute -top-1 -right-1 w-3 h-3 bg-purple-600 rounded-full border-2 border-white"></span>
+              {notificationCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-5 h-5 bg-purple-600 rounded-full border-2 border-white flex items-center justify-center text-white text-xs font-semibold">
+                  {notificationCount > 9 ? '9+' : notificationCount}
+                </span>
+              )}
+              <NotificationsDropdown
+                isOpen={showNotifications}
+                onClose={() => setShowNotifications(false)}
+              />
             </div>
 
             {/* Friend Requests */}
