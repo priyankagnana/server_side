@@ -263,6 +263,28 @@ const sendFriendRequest = async (req, res) => {
     await currentUser.save();
     await targetUser.save();
 
+    // Create notification for target user
+    const { createNotification } = require('./notificationController');
+    const notification = await createNotification(
+      userId,
+      'friend_request',
+      'New Friend Request',
+      `${currentUser.username || currentUser.email?.split('@')[0] || 'Someone'} sent you a friend request`,
+      currentUserId,
+      currentUserId,
+      'User'
+    );
+
+    // Emit socket event
+    try {
+      const io = req.app.get('io');
+      if (io && notification) {
+        io.to(`user_${userId.toString()}`).emit('new_notification', notification);
+      }
+    } catch (socketError) {
+      console.error('Error emitting socket event for friend request:', socketError);
+    }
+
     res.status(200).json({
       success: true,
       message: 'Friend request sent successfully'
@@ -403,6 +425,28 @@ const acceptFriendRequest = async (req, res) => {
 
     await currentUser.save();
     await requestUser.save();
+
+    // Create notification for the user who sent the request
+    const { createNotification } = require('./notificationController');
+    const notification = await createNotification(
+      requestUserId,
+      'friend_request_accepted',
+      'Friend Request Accepted',
+      `${currentUser.username || currentUser.email?.split('@')[0] || 'Someone'} accepted your friend request`,
+      currentUserId,
+      currentUserId,
+      'User'
+    );
+
+    // Emit socket event
+    try {
+      const io = req.app.get('io');
+      if (io && notification) {
+        io.to(`user_${requestUserId.toString()}`).emit('new_notification', notification);
+      }
+    } catch (socketError) {
+      console.error('Error emitting socket event for friend request accepted:', socketError);
+    }
 
     res.status(200).json({
       success: true,

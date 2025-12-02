@@ -72,6 +72,12 @@ app.use('/api/reports', require('./routes/reportRoutes'));
 // Call routes
 app.use('/api/calls', require('./routes/callRoutes'));
 
+// Study Group routes
+app.use('/api/study-groups', require('./routes/studyGroupRoutes'));
+
+// Notification routes
+app.use('/api/notifications', require('./routes/notificationRoutes'));
+
 // 404 handler
 app.use((req, res) => {
   res.status(404).json({
@@ -83,7 +89,7 @@ app.use((req, res) => {
 // Error handler
 app.use((err, req, res, next) => {
   console.error('Server error:', err);
-  
+
   // Handle payload too large error specifically
   if (err.type === 'entity.too.large' || err.message?.includes('too large') || err.name === 'PayloadTooLargeError') {
     return res.status(413).json({
@@ -91,7 +97,7 @@ app.use((err, req, res, next) => {
       message: 'Request payload too large. Please compress your image or use a smaller file.'
     });
   }
-  
+
   res.status(err.status || 500).json({
     success: false,
     message: err.message || 'Internal server error'
@@ -115,6 +121,9 @@ server.listen(PORT, () => {
   console.log('  GET  /api/reels');
   console.log('  POST /api/stories');
   console.log('  GET  /api/stories');
+  console.log('  POST /api/study-groups');
+  console.log('  GET  /api/study-groups');
+  console.log('  POST /api/study-groups/join');
   console.log('  Socket.io server initialized');
 });
 

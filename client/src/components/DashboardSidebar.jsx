@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Clock, Calendar, UserPlus, TrendingUp, BookOpen, Play, RotateCcw, HelpCircle, Coffee, Square } from 'lucide-react';
+import { Clock, Calendar, UserPlus, TrendingUp, BookOpen, Play, RotateCcw, HelpCircle, Coffee, Square, Hash, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+// import { useToast } from './Toast.jsx';
 import ReelsViewer from './ReelsViewer';
+import StudyGroupsSidebar from './StudyGroupsSidebar';
 
 const DashboardSidebar = () => {
   const navigate = useNavigate();
@@ -83,9 +85,9 @@ const DashboardSidebar = () => {
         const data = await response.json();
         if (data.success && data.users) {
           // Filter to show only users who are not friends and haven't sent/received requests
-          const nonFriends = data.users.filter(user => 
-            !user.isFriend && 
-            !user.friendRequestSent && 
+          const nonFriends = data.users.filter(user =>
+            !user.isFriend &&
+            !user.friendRequestSent &&
             !user.friendRequestReceived
           );
           // Limit to 10 suggestions
@@ -117,8 +119,8 @@ const DashboardSidebar = () => {
         const data = await response.json();
         if (data.success) {
           // Update the user's status in the list
-          setSuggestedFriends(prev => 
-            prev.map(user => 
+          setSuggestedFriends(prev =>
+            prev.map(user =>
               user.id === userId || user._id === userId
                 ? { ...user, friendRequestSent: true }
                 : user
@@ -213,12 +215,6 @@ const DashboardSidebar = () => {
     return `${dateStr} • ${timeString}`;
   };
 
-  const studyGroups = [
-    { name: 'Calculus II Study Group', field: 'Mathematics', members: 24 },
-    { name: 'Web Dev Bootcamp', field: 'Computer Science', members: 18 },
-    { name: 'Biology Lab Partners', field: 'Biology', members: 12 },
-  ];
-
   const reelsPollingIntervalRef = useRef(null);
   const lastReelsETagRef = useRef(null);
 
@@ -229,7 +225,7 @@ const DashboardSidebar = () => {
     // Start polling every 20 seconds when page is visible
     const startPolling = () => {
       if (reelsPollingIntervalRef.current) return;
-      
+
       reelsPollingIntervalRef.current = setInterval(() => {
         if (document.visibilityState === 'visible') {
           fetchTrendingReels(1, false, true); // true = silent update
@@ -264,7 +260,7 @@ const DashboardSidebar = () => {
 
   const fetchTrendingReels = async (page = 1, append = false, silent = false) => {
     if (loadingMore && !silent) return;
-    
+
     if (!silent) {
       setLoadingMore(true);
     }
@@ -307,7 +303,7 @@ const DashboardSidebar = () => {
           } else {
             setTrendingReels(data.reels);
           }
-          
+
           // Check if there are more reels to load
           setHasMore(data.reels.length === 3);
         }
@@ -328,10 +324,10 @@ const DashboardSidebar = () => {
 
     const handleScroll = () => {
       if (loadingMore) return;
-      
+
       const { scrollLeft, scrollWidth, clientWidth } = container;
       const scrollPercentage = (scrollLeft + clientWidth) / scrollWidth;
-      
+
       // Load more when user scrolls to 80% of the container
       if (scrollPercentage > 0.8 && hasMore && !loadingMore) {
         const nextPage = currentPage + 1;
@@ -438,8 +434,8 @@ const DashboardSidebar = () => {
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-          <Calendar className="text-blue-600" size={20} />
-          <h3 className="font-bold text-gray-900">Upcoming Events</h3>
+            <Calendar className="text-blue-600" size={20} />
+            <h3 className="font-bold text-gray-900">Upcoming Events</h3>
           </div>
           <button
             onClick={() => setIsEventRequestModalOpen(true)}
@@ -453,25 +449,25 @@ const DashboardSidebar = () => {
             <p className="text-center py-4 text-gray-500 text-sm">No upcoming events</p>
           ) : (
             events.map((event) => (
-            <div 
-                key={event._id} 
-              className="bg-gray-100 rounded-lg p-3 shadow-sm"
-            >
-              <h4 className="font-bold text-gray-900 mb-2">{event.title}</h4>
+              <div
+                key={event._id}
+                className="bg-gray-100 rounded-lg p-3 shadow-sm"
+              >
+                <h4 className="font-bold text-gray-900 mb-2">{event.title}</h4>
                 {event.description && (
                   <p className="text-sm text-gray-600 mb-2">{event.description}</p>
                 )}
-              <div className="space-y-1">
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Clock size={14} className="text-gray-500" />
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <Clock size={14} className="text-gray-500" />
                     <span>{formatEventDate(event.date, event.time)}</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <span className="text-gray-500">📍</span>
-                  <span>{event.location}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <span className="text-gray-500">📍</span>
+                    <span>{event.location}</span>
+                  </div>
                 </div>
               </div>
-            </div>
             ))
           )}
         </div>
@@ -479,9 +475,9 @@ const DashboardSidebar = () => {
 
       {/* Event Request Modal */}
       {isEventRequestModalOpen && (
-        <div 
+        <div
           className="fixed inset-0 flex items-center justify-center z-50"
-          style={{ 
+          style={{
             backgroundColor: 'rgba(0, 0, 0, 0.5)',
             backdropFilter: 'blur(4px)',
             WebkitBackdropFilter: 'blur(4px)'
@@ -492,7 +488,7 @@ const DashboardSidebar = () => {
             }
           }}
         >
-          <div 
+          <div
             className="bg-white rounded-xl p-6 max-w-md w-full mx-4"
             onClick={(e) => e.stopPropagation()}
           >
@@ -582,7 +578,7 @@ const DashboardSidebar = () => {
             Loading...
           </div>
         ) : suggestedFriends.length > 0 ? (
-          <div className="space-y-3 max-h-96 overflow-y-auto scrollbar-hide pr-2">
+          <div className="space-y-3" style={{ maxHeight: '400px', overflowY: 'auto' }}>
             {suggestedFriends.map((user) => (
               <div key={user.id || user._id} className="flex items-center justify-between flex-shrink-0">
                 <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -641,7 +637,7 @@ const DashboardSidebar = () => {
         </div>
         <div>
           {trendingReels.length > 0 ? (
-            <div 
+            <div
               ref={reelsContainerRef}
               className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide"
               style={{
@@ -655,9 +651,9 @@ const DashboardSidebar = () => {
                   onClick={() => handleReelClick(index)}
                 >
                   {reel.thumbnailUrl ? (
-                    <img 
-                      src={reel.thumbnailUrl} 
-                      alt={reel.caption || 'Reel'} 
+                    <img
+                      src={reel.thumbnailUrl}
+                      alt={reel.caption || 'Reel'}
                       className="w-full h-full object-cover"
                     />
                   ) : (
@@ -699,33 +695,8 @@ const DashboardSidebar = () => {
         initialIndex={selectedReelIndex}
       />
 
-      {/* Study Groups to Join */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-        <div className="flex items-center gap-2 mb-4">
-          <BookOpen className="text-green-500" size={20} />
-          <h3 className="font-semibold text-gray-900">Study Groups to Join</h3>
-        </div>
-        <div className="space-y-3">
-          {studyGroups.map((group, index) => (
-            <div 
-              key={index} 
-              className="bg-green-50 rounded-lg p-3 flex items-center justify-between"
-            >
-              <div className="flex-1">
-                <p className="font-bold text-gray-900 text-sm mb-1">{group.name}</p>
-                <p className="text-xs text-gray-600 mb-0.5">{group.field}</p>
-                <p className="text-xs text-gray-600">{group.members} members</p>
-              </div>
-              <button 
-                className="bg-green-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-600 transition-colors flex-shrink-0 ml-3"
-                style={{ backgroundColor: '#10b981', border: 'none' }}
-              >
-                Join
-              </button>
-            </div>
-          ))}
-        </div>
-      </div>
+      {/* Study Groups Sidebar */}
+      <StudyGroupsSidebar />
     </div>
   );
 };

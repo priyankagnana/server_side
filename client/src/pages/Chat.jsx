@@ -22,8 +22,7 @@ const Chat = () => {
   const { socket, isConnected } = useSocket();
   const toast = useToast();
   const currentUser = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
-  const currentUserId = currentUser.id;
-
+  const currentUserId = currentUser._id || currentUser.id;
   const [conversations, setConversations] = useState([]);
   const [activeConversation, setActiveConversation] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -199,6 +198,29 @@ const Chat = () => {
             // Update existing message if read status changed
             return prev.map(m => m.id === message.id ? { ...m, ...message } : m);
           }
+          
+          // Check if this is a message we just sent (replace temp message)
+          const isOwnMessage = message.sender?.id?.toString() === (currentUserId?.toString() || currentUser._id?.toString());
+          if (isOwnMessage) {
+            // Find and replace temp message with real message
+            const tempMessageIndex = prev.findIndex(m => 
+              m.id?.toString().startsWith('temp-') && 
+              m.sender?.id?.toString() === (currentUserId?.toString() || currentUser._id?.toString()) &&
+              m.content === message.content &&
+              Math.abs(new Date(m.createdAt).getTime() - new Date(message.createdAt).getTime()) < 5000 // Within 5 seconds
+            );
+            
+            if (tempMessageIndex !== -1) {
+              // Replace temp message with real message
+              const newMessages = [...prev];
+              newMessages[tempMessageIndex] = { 
+                ...message, 
+                isRead: message.messageType === 'system' ? true : (message.isRead || false) 
+              };
+              return newMessages;
+            }
+          }
+          
           // Add isRead field if not present (defaults to false for new messages)
           // System messages don't need read status
           return [...prev, { 
@@ -208,7 +230,6 @@ const Chat = () => {
         });
         scrollToBottom();
       }
-      
       // Update conversation list immediately (optimistic update)
       setConversations(prev => {
         const updated = prev.map(conv => {
@@ -823,10 +844,6 @@ const Chat = () => {
         fileUrl: fileUrl || ''
       });
 
-      // Remove temp message when real message arrives
-      socket.once('message_sent', () => {
-        setMessages(prev => prev.filter(m => m.id !== tempMessageId));
-      });
     } catch (error) {
       console.error('Error sending message:', error);
       toast.error('Failed to send message');
@@ -1735,7 +1752,7 @@ const Chat = () => {
                       );
                     }
 
-                    const isOwn = message.sender?.id === currentUserId;
+                    const isOwn = message.sender?.id?.toString() === (currentUserId?.toString() || currentUser._id?.toString());
                     // Show avatar if it's the first message, or if previous message was from different sender
                     const showAvatar = activeConversation.type === 'group' && !isOwn && (
                       index === 0 || messages[index - 1].sender?.id !== message.sender?.id
