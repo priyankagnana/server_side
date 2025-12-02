@@ -7,7 +7,8 @@
 
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
-  background-color: #f9fafb; /* Changed from lightblue to gray-50 to match app theme */
+  background-color: #f9fafb;
+  /* Changed from lightblue to gray-50 to match app theme */
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -20,8 +21,10 @@ html {
   padding: 0;
   min-width: 320px;
   min-height: 100vh;
-  background-color: #f9fafb; /* Match gray-50 background */
-  overflow-x: hidden; /* Prevent horizontal scroll */
+  background-color: #f9fafb;
+  /* Match gray-50 background */
+  overflow-x: hidden;
+  /* Prevent horizontal scroll */
 }
 
 a {
@@ -29,6 +32,7 @@ a {
   color: #646cff;
   text-decoration: inherit;
 }
+
 a:hover {
   color: #535bf2;
 }
@@ -38,9 +42,12 @@ body {
   padding: 0;
   min-width: 320px;
   min-height: 100vh;
-  background-color: #f9fafb; /* Match gray-50 background */
-  position: relative; /* Ensure body is positioned */
-  overflow-x: hidden; /* Prevent horizontal scroll */
+  background-color: #f9fafb;
+  /* Match gray-50 background */
+  position: relative;
+  /* Ensure body is positioned */
+  overflow-x: hidden;
+  /* Prevent horizontal scroll */
 }
 
 h1 {
@@ -53,12 +60,16 @@ h1 {
 
 /* Animations for ComingSoon page */
 @keyframes blob {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translate(0px, 0px) scale(1);
   }
+
   33% {
     transform: translate(30px, -50px) scale(1.1);
   }
+
   66% {
     transform: translate(-20px, 20px) scale(0.9);
   }
@@ -80,6 +91,7 @@ h1 {
   0% {
     width: 0%;
   }
+
   100% {
     width: 5%;
   }
@@ -105,6 +117,7 @@ h1 {
     transform: translateX(100%);
     opacity: 0;
   }
+
   to {
     transform: translateX(0);
     opacity: 1;
@@ -134,3 +147,21 @@ h1 {
   background: #9ca3af;
 }
 
+/* Custom Scrollbar for Profile Page */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}

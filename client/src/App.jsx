@@ -13,17 +13,18 @@ import FindStudyPartner from "./pages/FindStudyPartner.jsx";
 import Reels from "./pages/Reels.jsx";
 import Chat from "./pages/Chat.jsx";
 import JoinGroup from "./pages/JoinGroup.jsx";
+import StudyRooms from "./pages/StudyRooms.jsx";
 import Admin from "./pages/Admin.jsx";
 
 // Component to check auth and redirect
 function ProtectedRoute({ children }) {
   const location = useLocation();
   const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
-  
+
   if (!token) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
-  
+
   return children;
 }
 
@@ -32,7 +33,7 @@ function AppRoutes({ darkMode, setDarkMode }) {
   // Check if user is authenticated
   const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
   const isAuthenticated = !!token;
-  
+
   // Check if user has completed bio
   const getUser = () => {
     try {
@@ -42,7 +43,7 @@ function AppRoutes({ darkMode, setDarkMode }) {
       return null;
     }
   };
-  
+
   const user = getUser();
   const bioCompleted = user?.bioCompleted || false;
 
@@ -149,6 +150,30 @@ function AppRoutes({ darkMode, setDarkMode }) {
         element={
           <ProtectedRoute>
             <JoinGroup />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/study-rooms"
+        element={
+          <ProtectedRoute>
+            <StudyRooms />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/study-rooms/:groupId"
+        element={
+          <ProtectedRoute>
+            <StudyRooms />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/study-rooms/:groupId/:channelId"
+        element={
+          <ProtectedRoute>
+            <StudyRooms />
           </ProtectedRoute>
         }
       />

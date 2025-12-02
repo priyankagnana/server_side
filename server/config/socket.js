@@ -15,7 +15,7 @@ const usersOnChatPage = new Set(); // userId -> track who is on chat page
 const authenticateSocket = async (socket, next) => {
   try {
     const token = socket.handshake.auth.token || socket.handshake.headers.authorization?.split(' ')[1];
-    
+
     if (!token) {
       return next(new Error('Authentication error: No token provided'));
     }
@@ -65,18 +65,39 @@ const initializeSocket = (io) => {
     // Join user's personal room for notifications
     socket.join(`user_${userIdStr}`);
 
+    // Study Group Channel handlers
+    socket.on('join_channel', (channelRoom) => {
+      socket.join(channelRoom);
+      console.log(`[Socket] User ${userIdStr} joined channel ${channelRoom}`);
+    });
+
+    socket.on('leave_channel', (channelRoom) => {
+      socket.leave(channelRoom);
+      console.log(`[Socket] User ${userIdStr} left channel ${channelRoom}`);
+    });
+
+    socket.on('join_group', (groupId) => {
+      socket.join(`group-${groupId}`);
+      console.log(`[Socket] User ${userIdStr} joined group ${groupId}`);
+    });
+
+    socket.on('leave_group', (groupId) => {
+      socket.leave(`group-${groupId}`);
+      console.log(`[Socket] User ${userIdStr} left group ${groupId}`);
+    });
+
     // Handle chat page presence
     socket.on('chat_page_enter', () => {
       const userIdStr = userId.toString();
-      
+
       // Add user to chat page set (only if not already there)
       if (!usersOnChatPage.has(userIdStr)) {
         usersOnChatPage.add(userIdStr);
         console.log(`[Backend] User ${userIdStr} entered chat page. Total on chat: ${usersOnChatPage.size}`);
-        
+
         // Get list of other users BEFORE adding current user (to send to current user)
         const otherUsersOnChatPage = Array.from(usersOnChatPage).filter(id => id !== userIdStr);
-        
+
         // Notify all other users on chat page that this user is now on chat page
         usersOnChatPage.forEach(otherUserId => {
           if (otherUserId !== userIdStr) {
@@ -86,7 +107,7 @@ const initializeSocket = (io) => {
             }
           }
         });
-        
+
         // Notify this user about all other users currently on chat page
         if (otherUsersOnChatPage.length > 0) {
           otherUsersOnChatPage.forEach(otherUserId => {
@@ -100,12 +121,12 @@ const initializeSocket = (io) => {
 
     socket.on('chat_page_leave', () => {
       const userIdStr = userId.toString();
-      
+
       // Remove user from chat page set
       if (usersOnChatPage.has(userIdStr)) {
         usersOnChatPage.delete(userIdStr);
         console.log(`[Backend] User ${userIdStr} left chat page. Total on chat: ${usersOnChatPage.size}`);
-        
+
         // Notify all other users on chat page that this user left chat page
         usersOnChatPage.forEach(otherUserId => {
           const otherSocketId = userSockets.get(otherUserId);
@@ -181,7 +202,7 @@ const initializeSocket = (io) => {
 
         // Get room to determine if it's direct chat
         const messageRoom = await Room.findById(roomId);
-        const otherParticipant = messageRoom.type === 'direct' 
+        const otherParticipant = messageRoom.type === 'direct'
           ? messageRoom.participants.find(p => p.toString() !== userId)
           : null;
 
@@ -280,10 +301,10 @@ const initializeSocket = (io) => {
         console.error('[Socket] No callerId provided in call_accepted event');
         return;
       }
-      
+
       console.log(`[Socket] Looking up socket for caller: ${callerIdStr}`);
       console.log(`[Socket] Available sockets: ${Array.from(userSockets.keys()).join(', ')}`);
-      
+
       const callerSocketId = userSockets.get(callerIdStr);
       if (callerSocketId) {
         console.log(`[Socket] Found caller socket: ${callerSocketId}, emitting call_accepted`);
@@ -301,8 +322,8 @@ const initializeSocket = (io) => {
       const callerIdStr = callerId?.toString();
       if (callerIdStr) {
         const callerSocketId = userSockets.get(callerIdStr);
-      if (callerSocketId) {
-        io.to(callerSocketId).emit('call_rejected', {});
+        if (callerSocketId) {
+          io.to(callerSocketId).emit('call_rejected', {});
         } else {
           // Fallback: emit to user's personal room
           io.to(`user_${callerIdStr}`).emit('call_rejected', {});
@@ -317,8 +338,8 @@ const initializeSocket = (io) => {
         const callerIdStr = callerId?.toString();
         if (callerIdStr) {
           const callerSocketId = userSockets.get(callerIdStr);
-        if (callerSocketId) {
-          io.to(callerSocketId).emit('call_ended', {});
+          if (callerSocketId) {
+            io.to(callerSocketId).emit('call_ended', {});
           } else {
             io.to(`user_${callerIdStr}`).emit('call_ended', {});
           }
@@ -328,8 +349,8 @@ const initializeSocket = (io) => {
         const receiverIdStr = receiverId?.toString();
         if (receiverIdStr) {
           const receiverSocketId = userSockets.get(receiverIdStr);
-        if (receiverSocketId) {
-          io.to(receiverSocketId).emit('call_ended', {});
+          if (receiverSocketId) {
+            io.to(receiverSocketId).emit('call_ended', {});
           } else {
             io.to(`user_${receiverIdStr}`).emit('call_ended', {});
           }
@@ -341,7 +362,7 @@ const initializeSocket = (io) => {
     socket.on('disconnect', async () => {
       const userIdStr = userId.toString();
       console.log(`User ${userIdStr} disconnected`);
-      
+
       // Update lastSeen timestamp in database
       try {
         const User = require('../models/User');
@@ -349,11 +370,11 @@ const initializeSocket = (io) => {
       } catch (error) {
         console.error('Error updating lastSeen:', error);
       }
-      
+
       // Remove from all tracking
       userSockets.delete(userIdStr);
       socketUsers.delete(socketId);
-      
+
       // Remove from chat page and notify others
       if (usersOnChatPage.has(userIdStr)) {
         usersOnChatPage.delete(userIdStr);
@@ -365,7 +386,7 @@ const initializeSocket = (io) => {
           }
         });
       }
-      
+
       // Notify general offline status
       socket.broadcast.emit('user_offline', { userId: userIdStr });
     });

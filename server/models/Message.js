@@ -4,14 +4,26 @@ const messageSchema = new mongoose.Schema({
   sender: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: function() {
+    required: function () {
       return this.messageType !== 'system';
     }
   },
   room: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Room',
-    required: true
+    required: function () {
+      return !this.studyGroup;
+    }
+  },
+  studyGroup: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'StudyGroup'
+  },
+  channelId: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: function () {
+      return !!this.studyGroup;
+    }
   },
   content: {
     type: String,
@@ -44,6 +56,7 @@ const messageSchema = new mongoose.Schema({
 
 // Index for efficient message queries
 messageSchema.index({ room: 1, createdAt: -1 });
+messageSchema.index({ studyGroup: 1, channelId: 1, createdAt: -1 });
 
 module.exports = mongoose.model('Message', messageSchema);
 
