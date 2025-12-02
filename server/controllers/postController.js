@@ -26,11 +26,32 @@ const createPost = async (req, res) => {
     await post.save();
     await post.populate('author', 'username profilePicture email');
 
+    // Create notifications for friends
+    const User = require('../models/User');
+    const currentUser = await User.findById(userId);
+    const { createNotification } = require('./notificationController');
+    
+    if (currentUser && (privacy === 'public' || privacy === 'friends')) {
+      const friends = currentUser.friends || [];
+      const authorName = currentUser.username || currentUser.email?.split('@')[0] || 'Someone';
+      
+      // Create notifications for friends (only for friends privacy or public)
+      for (const friendId of friends) {
+        await createNotification(
+          friendId,
+          'post_created',
+          'New Post from Friend',
+          `${authorName} shared a new post`,
+          userId,
+          post._id,
+          'Post'
+        );
+      }
+    }
+
     // Emit socket event for new post
     const io = req.app.get('io');
     if (io) {
-      const User = require('../models/User');
-      const currentUser = await User.findById(userId);
       const field = post.author.email ? post.author.email.split('@')[0] : 'Student';
       
       const formattedPost = {
@@ -63,11 +84,41 @@ const createPost = async (req, res) => {
       // Broadcast to all connected users (for public posts)
       if (post.privacy === 'public') {
         io.emit('new_post', formattedPost);
+        
+        // Emit notifications to friends via socket
+        const friends = currentUser.friends || [];
+        friends.forEach(friendId => {
+          io.to(`user_${friendId}`).emit('new_notification', {
+            type: 'post_created',
+            title: 'New Post from Friend',
+            message: `${currentUser.username || currentUser.email?.split('@')[0] || 'Someone'} shared a new post`,
+            fromUser: {
+              _id: userId,
+              username: currentUser.username,
+              profilePicture: currentUser.profilePicture
+            },
+            relatedId: post._id,
+            relatedType: 'Post'
+          });
+        });
       } else {
         // For friends-only posts, emit to friends only
         const friends = currentUser.friends || [];
         friends.forEach(friendId => {
           io.to(`user_${friendId}`).emit('new_post', formattedPost);
+          // Emit notification
+          io.to(`user_${friendId}`).emit('new_notification', {
+            type: 'post_created',
+            title: 'New Post from Friend',
+            message: `${currentUser.username || currentUser.email?.split('@')[0] || 'Someone'} shared a new post`,
+            fromUser: {
+              _id: userId,
+              username: currentUser.username,
+              profilePicture: currentUser.profilePicture
+            },
+            relatedId: post._id,
+            relatedType: 'Post'
+          });
         });
         // Also emit to the author
         io.to(`user_${userId}`).emit('new_post', formattedPost);

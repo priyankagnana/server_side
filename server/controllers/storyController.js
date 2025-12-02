@@ -96,10 +96,32 @@ const createStory = async (req, res) => {
     await story.save();
     await story.populate('author', 'username profilePicture');
 
+    // Create notifications for friends
+    const User = require('../models/User');
+    const currentUser = await User.findById(userId);
+    const { createNotification } = require('./notificationController');
+    
+    if (currentUser && (privacy === 'public' || privacy === 'friends')) {
+      const friends = currentUser.friends || [];
+      const authorName = currentUser.username || currentUser.email?.split('@')[0] || 'Someone';
+      
+      // Create notifications for friends
+      for (const friendId of friends) {
+        await createNotification(
+          friendId,
+          'story_created',
+          'New Story from Friend',
+          `${authorName} shared a new story`,
+          userId,
+          story._id,
+          'Story'
+        );
+      }
+    }
+
     // Emit socket event for new story
     const io = req.app.get('io');
     if (io) {
-      const User = require('../models/User');
       const currentUser = await User.findById(userId);
       
       const formattedStory = {
@@ -123,10 +145,40 @@ const createStory = async (req, res) => {
       // For friends-only stories, emit to friends only
       if (story.privacy === 'public') {
         io.emit('new_story', formattedStory);
+        
+        // Emit notifications to friends via socket
+        const friends = currentUser.friends || [];
+        friends.forEach(friendId => {
+          io.to(`user_${friendId}`).emit('new_notification', {
+            type: 'story_created',
+            title: 'New Story from Friend',
+            message: `${currentUser.username || currentUser.email?.split('@')[0] || 'Someone'} shared a new story`,
+            fromUser: {
+              _id: userId,
+              username: currentUser.username,
+              profilePicture: currentUser.profilePicture
+            },
+            relatedId: story._id,
+            relatedType: 'Story'
+          });
+        });
       } else {
         const friends = currentUser.friends || [];
         friends.forEach(friendId => {
           io.to(`user_${friendId}`).emit('new_story', formattedStory);
+          // Emit notification
+          io.to(`user_${friendId}`).emit('new_notification', {
+            type: 'story_created',
+            title: 'New Story from Friend',
+            message: `${currentUser.username || currentUser.email?.split('@')[0] || 'Someone'} shared a new story`,
+            fromUser: {
+              _id: userId,
+              username: currentUser.username,
+              profilePicture: currentUser.profilePicture
+            },
+            relatedId: story._id,
+            relatedType: 'Story'
+          });
         });
         // Also emit to the author
         io.to(`user_${userId}`).emit('new_story', formattedStory);

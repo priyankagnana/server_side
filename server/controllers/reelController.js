@@ -70,6 +70,29 @@ const createReel = async (req, res) => {
     await reel.save();
     await reel.populate('author', 'username profilePicture');
 
+    // Create notifications for friends
+    const User = require('../models/User');
+    const currentUser = await User.findById(userId);
+    const { createNotification } = require('./notificationController');
+    
+    if (currentUser) {
+      const friends = currentUser.friends || [];
+      const authorName = currentUser.username || currentUser.email?.split('@')[0] || 'Someone';
+      
+      // Create notifications for friends (reels are always public)
+      for (const friendId of friends) {
+        await createNotification(
+          friendId,
+          'reel_created',
+          'New Reel from Friend',
+          `${authorName} shared a new reel`,
+          userId,
+          reel._id,
+          'Reel'
+        );
+      }
+    }
+
     // Emit socket event for new reel
     const io = req.app.get('io');
     if (io) {
@@ -92,6 +115,25 @@ const createReel = async (req, res) => {
 
       // Broadcast to all connected users
       io.emit('new_reel', formattedReel);
+      
+      // Emit notifications to friends via socket
+      if (currentUser) {
+        const friends = currentUser.friends || [];
+        friends.forEach(friendId => {
+          io.to(`user_${friendId}`).emit('new_notification', {
+            type: 'reel_created',
+            title: 'New Reel from Friend',
+            message: `${currentUser.username || currentUser.email?.split('@')[0] || 'Someone'} shared a new reel`,
+            fromUser: {
+              _id: userId,
+              username: currentUser.username,
+              profilePicture: currentUser.profilePicture
+            },
+            relatedId: reel._id,
+            relatedType: 'Reel'
+          });
+        });
+      }
     }
 
     res.status(201).json({
